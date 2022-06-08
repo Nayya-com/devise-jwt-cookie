@@ -2,8 +2,6 @@ module Devise
   module JWT
     module Cookie
       class Middleware
-        ENV_KEY = 'warden-jwt_auth.token'
-
         attr_reader :app, :config
 
         def initialize(app)
@@ -21,13 +19,19 @@ module Devise
           end
 
           status, headers, response = app.call(env)
-          if headers['Authorization'] && env[ENV_KEY]
-            name, cookie = CookieHelper.new.build(env[ENV_KEY])
+
+          new_token = env[Warden::JWTAuth::Hooks::PREPARED_TOKEN_ENV_KEY]
+
+          if headers['Authorization'] && new_token
+            # If devise-jwt is providing a token via Authorization header, add a cookie w/ the token:
+            name, cookie = CookieHelper.new.build(new_token)
             Rack::Utils.set_cookie_header!(headers, name, cookie)
           elsif token_should_be_revoked
+            # Else, if token is being revoked, add a set-cookie header to remove the cookie:
             name, cookie = CookieHelper.new.build(nil)
             Rack::Utils.set_cookie_header!(headers, name, cookie)
           end
+
           [status, headers, response]
         end
 
