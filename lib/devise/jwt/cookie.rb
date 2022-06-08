@@ -16,6 +16,7 @@ module Devise
 
       setting :name, 'access_token'
       setting :secure, true
+      setting :same_site, true
       setting :domain
 
       Import = Dry::AutoInject(config)
