@@ -2,6 +2,8 @@ module Devise
   module JWT
     module Cookie
       class Middleware
+        include Cookie::Import['expiration_header_name']
+
         attr_reader :app, :config
 
         def initialize(app)
@@ -26,6 +28,9 @@ module Devise
             # If devise-jwt is providing a token via Authorization header, add a cookie w/ the token:
             name, cookie = CookieHelper.new.build(new_token)
             Rack::Utils.set_cookie_header!(headers, name, cookie)
+
+            # And, set a header so the client can track the expiration of the token
+            headers[expiration_header_name] = expiration(new_token)
           elsif token_should_be_revoked
             # Else, if token is being revoked, add a set-cookie header to remove the cookie:
             name, cookie = CookieHelper.new.build(nil)
@@ -45,6 +50,10 @@ module Devise
                            method == revocation_method
           end
           false
+        end
+
+        def expiration(token)
+          Warden::JWTAuth::TokenDecoder.new.call(token)['exp']
         end
       end
     end

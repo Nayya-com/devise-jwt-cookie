@@ -15,6 +15,7 @@ module Devise
       extend Dry::Configurable
 
       setting :name, default: 'access_token'
+      setting :expiration_header_name, default: 'JWT-Expiration'
       setting :secure, default: true
       setting :same_site, default: true
       setting :domain
