@@ -2,17 +2,26 @@
 
 `devise-jwt-cookie` is a [devise](https://github.com/plataformatec/devise) extension based on [devise-jwt](https://github.com/waiting-for-dev/devise-jwt). It should be used alongside `devise-jwt`.
 
+# Changes made by this fork
+- Upgraded dependencies
+- Added `same_site` option for the cookie
+- Added header to return JWT expiration to client, with customizable name via `expiration_header_name` option
+- Removed `Authorization` header that `devise-jwt` sets to further secure against JS XSS attacks
+- Added support for `aud` header
+
 ## Installation
 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'devise-jwt-cookie', '~> 0.4.0'
+gem 'devise-jwt-cookie', git: 'https://github.com/Nayya-com/devise-jwt-cookie.git', branch: 'main'
 ```
 
 And then execute:
 
-    $ bundle
+```bash
+bundle
+```
 
 ## Usage
 
