@@ -27,8 +27,11 @@ module Devise
             name, cookie = CookieHelper.new.build(new_token)
             Rack::Utils.set_cookie_header!(headers, name, cookie)
 
-            # And, set a header so the client can track the expiration of the token
+            # Set a header so the client can track the expiration of the token
             headers[Devise::JWT::Cookie.config.expiration_header_name] = expiration(new_token)
+
+            # Remove the Authorization header (to prevent XSS JS exploits when token is refreshed)
+            headers.delete('Authorization')
           elsif token_should_be_revoked
             # Else, if token is being revoked, add a set-cookie header to remove the cookie:
             name, cookie = CookieHelper.new.build(nil)
