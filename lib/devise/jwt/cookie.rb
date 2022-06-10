@@ -17,7 +17,7 @@ module Devise
       setting :name, default: 'access_token'
       setting :expiration_header_name, default: 'JWT-Expiration'
       setting :secure, default: true
-      setting :same_site, default: true
+      setting :same_site, default: 'Lax' # Default to "SameSite=Lax", which provides partial CSRF defense without interrupting user experience
       setting :domain
 
       Import = Dry::AutoInject(config)
