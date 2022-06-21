@@ -14,8 +14,7 @@ module Devise
           if token_should_be_revoked
             # add the Authorization header, devise-jwt needs this to revoke tokens
             # we need to make sure this is done before the other middleware is run
-            request = ActionDispatch::Request.new(env)
-            env['HTTP_AUTHORIZATION'] = "Bearer #{CookieHelper.new.read_from(request.cookies)}"
+            env['HTTP_AUTHORIZATION'] = "Bearer #{client_supplied_token(env)}"
           end
 
           status, headers, response = app.call(env)
@@ -27,9 +26,6 @@ module Devise
             name, cookie = CookieHelper.new.build(new_token)
             Rack::Utils.set_cookie_header!(headers, name, cookie)
 
-            # Set a header so the client can track the expiration of the token
-            headers[Devise::JWT::Cookie.config.expiration_header_name] = expiration(new_token)
-
             # Remove the Authorization header (to prevent XSS JS exploits when token is refreshed)
             headers.delete('Authorization')
           elsif token_should_be_revoked
@@ -38,8 +34,16 @@ module Devise
             Rack::Utils.set_cookie_header!(headers, name, cookie)
           end
 
+          # Set a header so the client can track the expiration of the token
+          token = new_token || client_supplied_token(env)
+          if token
+            headers[Devise::JWT::Cookie.config.expiration_header_name] = expiration(token)
+          end
+
           [status, headers, response]
         end
+
+        private
 
         def token_should_be_revoked?(env)
           path_info = env['PATH_INFO'] || ''
@@ -55,6 +59,15 @@ module Devise
 
         def expiration(token)
           Warden::JWTAuth::TokenDecoder.new.call(token)['exp']
+        rescue
+          nil
+        end
+
+        def client_supplied_token(env)
+          request = ActionDispatch::Request.new(env)
+          CookieHelper.new.read_from(request.cookies)
+        rescue
+          nil
         end
       end
     end
