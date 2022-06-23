@@ -4,10 +4,12 @@
 
 # Changes made by this fork
 - Upgraded dependencies
-- Added `same_site` option for the cookie
+- Added `same_site` option for the cookie (default to "Lax")
 - Added header to return JWT expiration to client, with customizable name via `expiration_header_name` option
+  - NOTE: this header is included with every response, not just the ones that set 
 - Removed `Authorization` header that `devise-jwt` sets to further secure against JS XSS attacks
 - Added support for `aud` header
+- Only overwrite Authorization header w/ cookie value if it's not already set
 
 ## Installation
 
