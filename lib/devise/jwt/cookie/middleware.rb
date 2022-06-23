@@ -11,8 +11,8 @@ module Devise
 
         def call(env)
           token_should_be_revoked = token_should_be_revoked?(env)
-          if token_should_be_revoked
-            # add the Authorization header, devise-jwt needs this to revoke tokens
+          if token_should_be_revoked && env['HTTP_AUTHORIZATION'].nil?
+            # Add the Authorization header, devise-jwt needs this to revoke tokens
             # we need to make sure this is done before the other middleware is run
             env['HTTP_AUTHORIZATION'] = "Bearer #{client_supplied_token(env)}"
           end
